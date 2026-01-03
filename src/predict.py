@@ -21,6 +21,6 @@ def predict_image(img_path):
     return label, float(prob)
 
 if __name__ == "__main__":
-    test_path = "path/to/new_image.jpg"
+    test_path = "data/val/sharpen/3.jpg"
     label, prob = predict_image(test_path)
     print(f"Prediction: {label}, probability={prob:.3f}")

@@ -1,51 +1,22 @@
-import tensorflow as tf
 import os
+from dataloader import get_generators
+from model import build_model
 
-# Your data paths
-TRAIN_DIR = "data/train"
-VAL_DIR = "data/val"
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+TRAIN_DIR = os.path.join(BASE_DIR, "data", "train")
+VAL_DIR   = os.path.join(BASE_DIR, "data", "val")
 
-IMG_SIZE = (224, 224)
-BATCH_SIZE = 16
+def main():
+    train_gen, val_gen = get_generators(TRAIN_DIR, VAL_DIR)
+    model = build_model()
 
-print("Loading data...")
-train_ds = tf.keras.utils.image_dataset_from_directory(
-    TRAIN_DIR,
-    image_size=IMG_SIZE,
-    batch_size=BATCH_SIZE,
-    color_mode="grayscale",
-    label_mode="binary",
-    shuffle=True
-)
+    model.fit(
+        train_gen,
+        validation_data=val_gen,
+        epochs=10
+    )
 
-val_ds = tf.keras.utils.image_dataset_from_directory(
-    VAL_DIR,
-    image_size=IMG_SIZE,
-    batch_size=BATCH_SIZE,
-    color_mode="grayscale",
-    label_mode="binary",
-    shuffle=False
-)
+    model.save(os.path.join(BASE_DIR, "wear_classifier.h5"))
 
-print("Classes:", train_ds.class_names)
-
-# Model
-model = tf.keras.Sequential([
-    tf.keras.layers.Conv2D(32, (3, 3), activation="relu", input_shape=(224, 224, 1)),
-    tf.keras.layers.MaxPooling2D(2, 2),
-    tf.keras.layers.Conv2D(64, (3, 3), activation="relu"),
-    tf.keras.layers.MaxPooling2D(2, 2),
-    tf.keras.layers.Conv2D(128, (3, 3), activation="relu"),
-    tf.keras.layers.MaxPooling2D(2, 2),
-    tf.keras.layers.Flatten(),
-    tf.keras.layers.Dense(128, activation="relu"),
-    tf.keras.layers.Dropout(0.5),
-    tf.keras.layers.Dense(1, activation="sigmoid")
-])
-
-model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
-
-# Train
-model.fit(train_ds, validation_data=val_ds, epochs=10)
-model.save("wear_classifier.h5")
-print(" Done! Model saved.")
+if __name__ == "__main__":
+    main()
