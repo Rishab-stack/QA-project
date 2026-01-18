@@ -6,3 +6,5 @@ python src/train.py
 
 python src/predict.py
 
+pip install opencv-python
+pip install matplotlib
